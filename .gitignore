@@ -2,3 +2,4 @@
 *.xls
 *.xlsx
 __pycache__/
+*.parquet
