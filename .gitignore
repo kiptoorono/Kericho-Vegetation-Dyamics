@@ -3,3 +3,5 @@
 *.xlsx
 __pycache__/
 *.parquet
+NDVI_Frames_v2-20260924T081520Z-1-001/
+frames_composed/
