@@ -1,10 +1,12 @@
 # Vegetation Dynamics in Kenya's Tea Highlands
 
-![Kericho NDVI animation](Figures/kericho_ndvi_animation.gif)
-
 A multi-sensor analysis of vegetation change in Kericho County, Kenya,
 combining 26 years of MODIS NDVI with high-resolution Sentinel-2 imagery
 and gridded climate data (CHIRPS rainfall, ERA5-Land, SMAP soil moisture).
+
+
+![Kericho NDVI animation](Figures/kericho_ndvi_animation.gif)
+
 
 **Status:** data pipeline complete; analysis in progress.
 
