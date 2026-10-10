@@ -18,6 +18,7 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib.patheffects as pe
 
 
+# --- Adjust these paths to match your machine ---
 RAW_DIR = Path(r'C:\Users\Rono\Desktop\GEE\NDVI_Frames_v2-20260924T081520Z-1-001')
 OUT_DIR = Path(r'C:\Users\Rono\Desktop\GEE\frames_composed')
 # ------------------------------------------------
@@ -67,46 +68,46 @@ def read_rgb_geotiff(path):
 def compose_frame(tif_path: Path, out_path: Path, date_label: str):
     rgb = read_rgb_geotiff(tif_path)
 
-    fig = plt.figure(figsize=(8, 10), dpi=150)
+    fig = plt.figure(figsize=(8, 8.5), dpi=150)
     fig.patch.set_facecolor('white')
 
     # --- Main map ---
-    ax = fig.add_axes([0.04, 0.22, 0.92, 0.68])
+    ax = fig.add_axes([0.04, 0.17, 0.92, 0.78])
     ax.imshow(rgb)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
         spine.set_edgecolor('#333333')
-        spine.set_linewidth(0.8)~
+        spine.set_linewidth(0.8)
 
-    # --- Title ---
-    fig.text(0.5, 0.965, 'Vegetation Dynamics in Kericho County, Kenya',
-             ha='center', va='top', fontsize=15, fontweight='bold',
+    # --- Title and subtitle ---
+    fig.text(0.5, 0.99, 'Vegetation Dynamics in Kericho County, Kenya',
+             ha='center', va='top', fontsize=14, fontweight='bold',
              color='#1a1a1a')
-    fig.text(0.5, 0.935, 'Sentinel-2 NDVI, 10 m, Cloud Score+ mask',
-             ha='center', va='top', fontsize=10, color='#555555')
+    fig.text(0.5, 0.965, 'Sentinel-2 NDVI at 10 m resolution',
+             ha='center', va='top', fontsize=9.5, color='#555555')
 
-    # --- Date stamp — top-right, inside map ---
-    ax.text(0.985, 0.965, date_label, transform=ax.transAxes,
-            ha='right', va='top', fontsize=14, fontweight='bold',
-            color='black',
-            path_effects=[pe.withStroke(linewidth=3, foreground='white')])
-
-    # --- North arrow — top-left, black ---
+    # --- North arrow — top-left of map ---
     ax.annotate('',
-                xy=(0.06, 0.92), xytext=(0.06, 0.82),
+                xy=(0.05, 0.94), xytext=(0.05, 0.86),
                 xycoords='axes fraction', textcoords='axes fraction',
                 arrowprops=dict(arrowstyle='-|>', color='black',
-                                lw=2.5, mutation_scale=20))
-    ax.text(0.06, 0.945, 'N', transform=ax.transAxes,
-            ha='center', va='bottom', fontsize=14, fontweight='bold',
+                                lw=2.5, mutation_scale=18))
+    ax.text(0.05, 0.96, 'N', transform=ax.transAxes,
+            ha='center', va='bottom', fontsize=12, fontweight='bold',
             color='black',
             path_effects=[pe.withStroke(linewidth=3, foreground='white')])
 
-    # --- Scale bar — bottom-right, standard cartographic style ---
-    bar_x0, bar_x1 = 0.72, 0.97
-    bar_y = 0.06
-    bar_h = 0.012
+    # --- Date stamp — top-left area of map, next to north arrow ---
+    ax.text(0.28, 0.90, date_label, transform=ax.transAxes,
+            ha='left', va='center', fontsize=13, fontweight='bold',
+            color='black',
+            path_effects=[pe.withStroke(linewidth=3, foreground='white')])
+
+    # --- Scale bar — inside map, bottom-right ---
+    bar_x0, bar_x1 = 0.68, 0.94
+    bar_y = 0.05
+    bar_h = 0.013
     n_segments = 4
     seg_w = (bar_x1 - bar_x0) / n_segments
 
@@ -115,27 +116,24 @@ def compose_frame(tif_path: Path, out_path: Path, date_label: str):
         rect = mpatches.Rectangle(
             (bar_x0 + i * seg_w, bar_y), seg_w, bar_h,
             transform=ax.transAxes, facecolor=color,
-            edgecolor='black', linewidth=0.6, zorder=10,
-            clip_on=False)
+            edgecolor='black', linewidth=0.6, zorder=10)
         ax.add_patch(rect)
 
-    # Tick labels below the bar (0, 5, 10, 15, 20 km)
     for i in range(n_segments + 1):
         x = bar_x0 + i * seg_w
-        ax.text(x, bar_y - 0.004, str(i * 5),
+        ax.text(x, bar_y - 0.005, str(i * 5),
                 transform=ax.transAxes, ha='center', va='top',
-                fontsize=7, color='black',
+                fontsize=6.5, color='black',
                 path_effects=[pe.withStroke(linewidth=2.5,
                                             foreground='white')])
 
-    # Unit label above the bar
-    ax.text((bar_x0 + bar_x1) / 2, bar_y + bar_h + 0.004, 'km',
-            transform=ax.transAxes, ha='center', va='bottom',
-            fontsize=7, color='black', style='italic',
+    ax.text(bar_x1 + 0.01, bar_y + bar_h / 2, 'km',
+            transform=ax.transAxes, ha='left', va='center',
+            fontsize=6.5, color='black', style='italic',
             path_effects=[pe.withStroke(linewidth=2.5, foreground='white')])
 
-    # --- Legend ---
-    cax = fig.add_axes([0.15, 0.10, 0.7, 0.025])
+    # --- NDVI colorbar — flush with the map bottom edge ---
+    cax = fig.add_axes([0.15, 0.145, 0.7, 0.025])
     cb = ColorbarBase(cax, cmap=CMAP, norm=NORM,
                       orientation='horizontal',
                       ticks=NDVI_BOUNDS, drawedges=True)
@@ -143,8 +141,8 @@ def compose_frame(tif_path: Path, out_path: Path, date_label: str):
     cb.ax.tick_params(labelsize=8)
     cb.outline.set_edgecolor('#333333')
 
-    # --- Footer ---
-    fig.text(0.5, 0.03,
+    # --- Footer — moved up, closer to the colorbar ---
+    fig.text(0.5, 0.06,
              'Cross-validated against MODIS (r = 0.90)  ·  '
              'Data: Copernicus Sentinel-2 SR Harmonized',
              ha='center', va='bottom', fontsize=7, color='#666666')
